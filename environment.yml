@@ -1,0 +1,14 @@
+name: nyc-active-construction-sites
+dependencies:
+  - python=2.7
+  - pandas
+  - jupyter
+  - matplotlib
+  - seaborn
+  - requests
+  - pip:
+    - selenium
+    - bs4
+    - arrow
+    - tqdm
+	- pdfminer
