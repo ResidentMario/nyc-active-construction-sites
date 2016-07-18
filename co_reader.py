@@ -217,7 +217,7 @@ def get_co_date(bin, borough_code):
         if not success_status:
             continue
         # If the download returns True, run the resultant PDF through the scrape.
-        print("Copying text using optical character recognition...")
+        # print("Copying text using optical character recognition...")
         # temp_ocr = _copy_pdf_using_ocr("temp.pdf")
         print("Harvesting dates...")
         # co = _harvest_certificate_date_from_pdf(temp_ocr)

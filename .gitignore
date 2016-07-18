@@ -4,3 +4,5 @@ co_reader.pyc
 ghostdriver.log
 temp.pdf
 DOB Permit Issuance.csv
+.DS_Store
+/data
