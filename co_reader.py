@@ -49,7 +49,7 @@ def _get_certificate_pdf_links(bin):
     """
     req_str = "http://a810-bisweb.nyc.gov/bisweb/COsByLocationServlet?requestid=&allbin={0}".format(bin)
     _driver.get(req_str)
-    # print("Requested BIN {0} data from BIS, awaiting response...".format(bin))
+    print("Requested BIN {0} data from BIS, awaiting response...".format(bin))
     try:
         webdriver.support.ui.WebDriverWait(_driver, 10).until(
             EC.title_is("Property Overview")
@@ -121,7 +121,7 @@ def _download_certificate_pdf(co_link, borough_code):
     r = requests.get(req_str)
     # If we get the PDF immediately we are done.
     if r.headers['content-type'] == "application/pdf":
-        # print("PDF Certificate of Occupancy '{0}' retrieved.".format(co_link))
+        print("PDF Certificate of Occupancy '{0}' retrieved.".format(co_link))
         with open('temp.pdf', 'wb') as f:
             for chunk in r.iter_content(2000):
                 f.write(chunk)
@@ -129,17 +129,17 @@ def _download_certificate_pdf(co_link, borough_code):
     # If we do not get the PDF immediately we either get a silent 404 page or an error message.
     # First we respond to the case of a 404. This is really bad because it means our encoding scheme is wrong!
     elif "java.io.FileNotFoundException" in r.text[:500]:
-        # print("Error attempting to retrieve PDF Certificate of Occupancy '{0}'!".format(co_link))
-        # print("This is a serious but non-fatal error indicating an error in our filename reverse engineering.")
+        print("Error attempting to retrieve PDF Certificate of Occupancy '{0}'!".format(co_link))
+        print("This is a serious but non-fatal error indicating an error in our filename reverse engineering.")
         return False
     # Otherwise we have hit a waiting screen. So we will resend queries every five seconds until we get it.
     else:
         while "waiting-main" in r.text[:500]:
-            # print("Got the wait page. Trying to retrieve the PDF Certificate of Occupancy '{0}' again in five "
-            #       "seconds...".format(co_link))
+            print("Got the wait page. Trying to retrieve the PDF Certificate of Occupancy '{0}' again in five "
+                  "seconds...".format(co_link))
             time.sleep(5)
             r = requests.get(req_str)
-        # print("After some delay, PDF Certificate of Occupancy '{0}' retrieved.".format(co_link))
+        print("After some delay, PDF Certificate of Occupancy '{0}' retrieved.".format(co_link))
         with open('temp.pdf', 'wb') as f:
             for chunk in r.iter_content(2000):
                 f.write(chunk)
@@ -174,7 +174,7 @@ def _harvest_certificate_date_from_pdf(ocr_pdf_link):
     output = p.communicate()[0]
     # Dates must be of the form "12/24/2012" to get read at this juncture.
     date_strs = re.findall("[0-9]{2}[/][0-9]{2}[/][0-9]{4}", output)
-    # print(date_strs)
+    print(date_strs)
     if date_strs:
         # The following expression collects dates, converts them to Arrow objects, find the minimum date,
         # and then posts the datetime version of the minimum date (e.g. converts the final arrow object into a
@@ -209,29 +209,29 @@ def get_co_date(bin, borough_code):
     """
     pdf_links = _get_certificate_pdf_links(bin)
     min_certs = []
-    # print("Discovered {0} Certificates of Occupancy.".format(len(pdf_links)))
+    print("Discovered {0} Certificates of Occupancy.".format(len(pdf_links)))
     for pdf_link in pdf_links:
-        # print("Scanning {0}...".format(pdf_link))
+        print("Scanning {0}...".format(pdf_link))
         success_status = _download_certificate_pdf(pdf_link, borough_code)
         # If the download returns False, indicating a failure, just skip to the next document in the loop.
         if not success_status:
             continue
         # If the download returns True, run the resultant PDF through the scrape.
-        # print("Copying text using optical character recognition...")
+        print("Copying text using optical character recognition...")
         # temp_ocr = _copy_pdf_using_ocr("temp.pdf")
-        # print("Harvesting dates...")
+        print("Harvesting dates...")
         # co = _harvest_certificate_date_from_pdf(temp_ocr)
         try:
             co = _harvest_certificate_date_from_pdf("temp.pdf")
         except:
-            # print("Date harvesting failed! Probably the PDF was edit-locked. Skipped, for now.")
+            print("Date harvesting failed! Probably the PDF was edit-locked. Skipped, for now.")
             co = None
         if co:
-            # print("Date(s) found!")
+            print("Date(s) found!")
             min_certs.append(co)
         else:
             pass
-            # print("No date found. Continuing...")
+            print("No date found. Continuing...")
         # break
     # Return the maximum recognized minimum certificate obtained if dates are found, None otherwise.
     if min_certs:
